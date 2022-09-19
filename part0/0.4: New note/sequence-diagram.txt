@@ -1,0 +1,19 @@
+note over browser:
+Enter text into text
+field and press 'Save'
+end note
+
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note
+
+note over server:
+Server creates and
+persists a new note
+end note
+
+server-->browser: 302 Redirect https://studies.cs.helsinki.fi/exampleapp/note (refresh)
+
+note over browser:
+Page refreshes, start
+from first sequence
+diagram
+end note
