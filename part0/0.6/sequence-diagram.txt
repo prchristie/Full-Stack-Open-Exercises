@@ -1,0 +1,19 @@
+note over browser:
+Enter text into text
+field and press 'Save'
+end note
+
+note over browser:
+Brower executes onsubmit event handler,
+creating a new note and 1) adding to local
+notes list and redrawing notes and
+2) sending to server in POST request
+end note
+
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+
+note over server:
+Server creates and persists a new note
+end note
+
+server-->browser: 201 {"message":"note created"}
