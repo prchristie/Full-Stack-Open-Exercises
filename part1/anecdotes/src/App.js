@@ -43,6 +43,9 @@ const App = () => {
 
   const mostVoted = indexOfMax(votes);
 
+  // Im not sure I entirely see the point behind a Button and Header component like a lot of the examples show.
+  // They don't abstract anything meaningful away unless we are doing more with the header/button.
+  // Probably lack of knowledge from me, but the simplest and most effective code imo is this - DRY and YAGNI
   return (
     <>
       <h1>Anecdote of the day</h1>
