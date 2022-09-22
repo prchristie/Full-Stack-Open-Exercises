@@ -6,12 +6,20 @@ const Votes = ({ votes }) => (
   </div>
 );
 
-const Anecdote = ({ anecdote, numVotes: votes }) => (
+const Anecdote = ({ anecdote, votes }) => (
   <>
     <div>{anecdote}</div>
     <Votes votes={votes} />
   </>
 );
+
+const Winner = ({ anecdote, votes }) => {
+  if (votes === 0) {
+    return <div>Noone has voted for an anecdote yet</div>;
+  }
+
+  return <Anecdote anecdote={anecdote} votes={votes} />;
+};
 
 const App = () => {
   const anecdotes = [
@@ -43,17 +51,14 @@ const App = () => {
 
   const mostVoted = indexOfMax(votes);
 
-  // Im not sure I entirely see the point behind a Button and Header component like a lot of the examples show.
-  // They don't abstract anything meaningful away unless we are doing more with the header/button.
-  // Probably lack of knowledge from me, but the simplest and most effective code imo is this - DRY and YAGNI
   return (
     <>
       <h1>Anecdote of the day</h1>
-      <Anecdote anecdote={anecdotes[selected]} numVotes={votes[selected]} />
+      <Anecdote anecdote={anecdotes[selected]} votes={votes[selected]} />
       <button onClick={randomizeAnecdote}>next anecdote</button>
       <button onClick={voteForAnecdote}>vote</button>
       <h1>Anecdote with most votes</h1>
-      <Anecdote anecdote={anecdotes[mostVoted]} numVotes={votes[mostVoted]} />
+      <Winner anecdote={anecdotes[mostVoted]} votes={votes[mostVoted]} />
     </>
   );
 };
