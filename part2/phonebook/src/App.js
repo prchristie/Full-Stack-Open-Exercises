@@ -1,13 +1,17 @@
 import { useState } from "react";
-import { NewContactForm } from "./components/NewContactForm";
+import { NewContactForm as NewPersonForm } from "./components/NewContactForm";
 import { PhoneDirectory } from "./PhoneDirectory";
 
 const App = () => {
   const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "040-1234567" },
+    { name: "Arto Hellas", number: "040-123456", id: 1 },
+    { name: "Ada Lovelace", number: "39-44-5323523", id: 2 },
+    { name: "Dan Abramov", number: "12-43-234345", id: 3 },
+    { name: "Mary Poppendieck", number: "39-23-6423122", id: 4 },
   ]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
+  const [nameFilter, setNameFilter] = useState("");
 
   const handleNameChange = (event) => setNewName(event.target.value);
 
@@ -27,20 +31,36 @@ const App = () => {
     setNewName("");
   };
 
+  const filterPersonsByName = (name) =>
+    persons.filter((person) => person.name.toLowerCase().includes(nameFilter));
+
   return (
     <div>
       <h2>Phonebook</h2>
-      {/* Need a better way of dealing with forms. Whats the best practice? */}
-      <NewContactForm
+      <NameFilterForm
+        handleFilterChange={(e) => setNameFilter(e.target.value)}
+        nameFilterValue={nameFilter}
+      />
+      {/* Need a better way of dealing with forms. Whats the best practice? Imagine a form with 5
+      or more inputs. This doenst scale well*/}
+      <h3>Add a new</h3>
+      <NewPersonForm
         handleSubmit={addPerson}
         handleNameChange={handleNameChange}
-        newName={newName}
+        nameValue={newName}
         handleNumberChange={handleNumberChange}
-        newNumber={newNumber}
+        numberValue={newNumber}
       />
-      <PhoneDirectory persons={persons} />
+      <PhoneDirectory persons={filterPersonsByName(nameFilter)} />
     </div>
   );
 };
+
+const NameFilterForm = ({ handleFilterChange, nameFilterValue }) => (
+  <div>
+    filter shown with
+    <input type="text" onChange={handleFilterChange} value={nameFilterValue} />
+  </div>
+);
 
 export default App;
