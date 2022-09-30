@@ -1,14 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NewContactForm as NewPersonForm } from "./components/NewContactForm";
-import { PhoneDirectory } from "./PhoneDirectory";
+import { PhoneDirectory } from "./components/PhoneDirectory";
+import axios from "axios";
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "040-123456", id: 1 },
-    { name: "Ada Lovelace", number: "39-44-5323523", id: 2 },
-    { name: "Dan Abramov", number: "12-43-234345", id: 3 },
-    { name: "Mary Poppendieck", number: "39-23-6423122", id: 4 },
-  ]);
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [nameFilter, setNameFilter] = useState("");
@@ -20,19 +16,33 @@ const App = () => {
   const doesPhoneBookContainName = (name) =>
     persons.findIndex((person) => person.name === name) !== -1;
 
-  const addPerson = (event) => {
-    event.preventDefault();
-    if (doesPhoneBookContainName(newName)) {
+  const addPerson = (person) => {
+    if (doesPhoneBookContainName(person.name)) {
       alert(`${newName} is already added to the phonebook`);
-      return;
+      return false;
     }
-    setPersons(persons.concat({ name: newName, number: newNumber }));
+
+    setPersons(persons.concat(person));
+    return true;
+  };
+
+  useEffect(() => {
+    axios.get("http://localhost:3001/persons").then((response) => {
+      setPersons(response.data);
+    });
+  }, []);
+
+  const handleNewPersonEvent = (event) => {
+    event.preventDefault();
+    if (addPerson({ name: newName, number: newNumber })) return;
     setNewNumber("");
     setNewName("");
   };
 
-  const filterPersonsByName = (name) =>
-    persons.filter((person) => person.name.toLowerCase().includes(nameFilter));
+  const filterPersonsByName = () =>
+    persons.filter((person) =>
+      person.name.toLowerCase().includes(nameFilter.toLowerCase())
+    );
 
   return (
     <div>
@@ -45,13 +55,13 @@ const App = () => {
       or more inputs. This doenst scale well*/}
       <h3>Add a new</h3>
       <NewPersonForm
-        handleSubmit={addPerson}
+        handleSubmit={handleNewPersonEvent}
         handleNameChange={handleNameChange}
         nameValue={newName}
         handleNumberChange={handleNumberChange}
         numberValue={newNumber}
       />
-      <PhoneDirectory persons={filterPersonsByName(nameFilter)} />
+      <PhoneDirectory persons={filterPersonsByName()} />
     </div>
   );
 };
