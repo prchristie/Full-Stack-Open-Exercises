@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { CountriesView } from "./components/Content";
 import { CountryFilter } from "./components/Filter";
 
+const api_key = process.env.OPEN_WEATHER_API_KEY;
+
 function App() {
   const [countryFilter, setCountryFilter] = useState("");
   const [countries, setCountries] = useState([]);
@@ -25,9 +27,10 @@ function App() {
       filteredCountries.length === 1 &&
       filteredCountries[0].hasOwnProperty("capital")
     ) {
+      console.log(api_key);
       axios
         .get(
-          `https://api.openweathermap.org/data/2.5/weather?q=${filteredCountries[0].capital[0]}&APPID=a94af10853fe598be93a9498257fba2d&units=metric`
+          `https://api.openweathermap.org/data/2.5/weather?q=${filteredCountries[0].capital[0]}&APPID=${api_key}&units=metric`
         )
         .then((response) => setWeather(response.data));
     }
