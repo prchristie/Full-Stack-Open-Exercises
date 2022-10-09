@@ -16,8 +16,6 @@ export const CountriesView = ({
         {/* <Weather weather={countryWeather} /> */}
       </>
     );
-  } else if (countries.length === 0) {
-    return <>No countries</>;
   }
 
   return (

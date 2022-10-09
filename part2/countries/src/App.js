@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { CountriesView } from "./components/Content";
 import { CountryFilter } from "./components/Filter";
 
-const api_key = process.env.OPEN_WEATHER_API_KEY;
+const api_key = process.env.REACT_APP_API_KEY;
 
 function App() {
   const [countryFilter, setCountryFilter] = useState("");
