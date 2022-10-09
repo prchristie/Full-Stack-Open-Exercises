@@ -1,9 +1,13 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { CountriesView } from "./components/Content";
+import { CountryFilter } from "./components/Filter";
 
 function App() {
   const [countryFilter, setCountryFilter] = useState("");
   const [countries, setCountries] = useState([]);
+  const [weather, setWeather] = useState(null);
+  const [filteredCountries, setFilteredCountries] = useState([]);
 
   useEffect(() => {
     axios
@@ -11,65 +15,45 @@ function App() {
       .then((response) => setCountries(response.data));
   }, []);
 
-  const filteredCountries = countries.filter((country) =>
-    country.name.common.toUpperCase().includes(countryFilter.toUpperCase())
-  );
+  const filterCountriesByName = (name) =>
+    countries.filter((country) =>
+      country.name.common.toUpperCase().includes(name.toUpperCase())
+    );
+
+  useEffect(() => {
+    if (
+      filteredCountries.length === 1 &&
+      filteredCountries[0].hasOwnProperty("capital")
+    ) {
+      axios
+        .get(
+          `https://api.openweathermap.org/data/2.5/weather?q=${filteredCountries[0].capital[0]}&APPID=a94af10853fe598be93a9498257fba2d&units=metric`
+        )
+        .then((response) => setWeather(response.data));
+    }
+  }, [filteredCountries]);
+
+  const handleShowButtonClick = (country) =>
+    handleFilterChange(country.name.common);
+
+  const handleFilterChange = (value) => {
+    setCountryFilter(value);
+    setFilteredCountries(filterCountriesByName(value));
+  };
 
   return (
     <div>
-      <Filter
-        countryFilter={countryFilter}
-        setCountryFilter={setCountryFilter}
+      <CountryFilter
+        currentFilter={countryFilter}
+        handleFilterChange={handleFilterChange}
       />
-      <CountriesInfo countries={filteredCountries} />
+      <CountriesView
+        countries={filteredCountries}
+        countryWeather={weather}
+        handleShowButtonClick={handleShowButtonClick}
+      />
     </div>
   );
 }
 
-const CountriesInfo = ({ countries }) => {
-  if (countries.length > 10) {
-    return <>Too many matches, specify another filter</>;
-  } else if (countries.length === 1) {
-    const country = countries[0];
-    return <CountryDetail country={country} />;
-  }
-
-  return <CountryList countries={countries} />;
-};
-
-const CountryList = ({ countries }) => {
-  return (
-    <>
-      {countries.map((country) => (
-        <div key={country.name.common}>{country.name.common}</div>
-      ))}
-    </>
-  );
-};
-
-const CountryDetail = ({ country }) => {
-  return (
-    <>
-      <h1>{country.name.common}</h1>
-      <div>capital {country.capital}</div>
-      <div>area {country.area}</div>
-      <h4>languages:</h4>
-      <ul>
-        {Object.entries(country.languages).map(([short, language]) => (
-          <li key={short}>{language}</li>
-        ))}
-      </ul>
-      <img src={country.flags.png} alt={`${country.name.common} flag`} />
-    </>
-  );
-};
 export default App;
-const Filter = ({ countryFilter, setCountryFilter }) => (
-  <form>
-    find countries
-    <input
-      value={countryFilter}
-      onChange={(e) => setCountryFilter(e.target.value)}
-    />
-  </form>
-);
