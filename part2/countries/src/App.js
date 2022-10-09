@@ -27,7 +27,6 @@ function App() {
       filteredCountries.length === 1 &&
       filteredCountries[0].hasOwnProperty("capital")
     ) {
-      console.log(api_key);
       axios
         .get(
           `https://api.openweathermap.org/data/2.5/weather?q=${filteredCountries[0].capital[0]}&APPID=${api_key}&units=metric`
