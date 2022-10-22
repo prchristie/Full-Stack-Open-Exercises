@@ -21,10 +21,28 @@ const App = () => {
     persons.find((person) => person.name === name);
 
   useEffect(() => {
-    personService.getAll().then((persons) => {
-      setPersons(persons);
-    });
+    personService
+      .getAll()
+      .then((persons) => {
+        setPersons(persons);
+      })
+      .catch((err) => {
+        notifyOfError(err.message);
+      });
   }, []);
+
+  const notify = (msg, isError) => {
+    if (isError) {
+      setError(msg);
+      setTimeout(() => setError(null), 5000);
+    } else {
+      setNotification(msg);
+      setTimeout(() => setNotification(null), 5000);
+    }
+  };
+
+  const notifyOfError = (msg) => notify(msg, true);
+  const notifyOfSuccess = (msg) => notify(msg, false);
 
   const handleAddPersonEvent = (event) => {
     event.preventDefault();
@@ -32,7 +50,6 @@ const App = () => {
     const newPerson = { name: newName, number: newNumber };
 
     const personWithSameName = findPersonOfName(newPerson.name);
-    console.log(personWithSameName);
 
     if (personWithSameName !== undefined) {
       if (
@@ -50,29 +67,30 @@ const App = () => {
             );
             setNewNumber("");
             setNewName("");
-            setNotification(`Updated ${newPerson.name}`);
+            notifyOfSuccess(`Updated ${newPerson.name}`);
           })
           .catch((err) => {
-            setError(
+            notifyOfError(
               `Information of ${newPerson.name} has already been removed from server`
             );
             setPersons(
               persons.filter((person) => person.id !== personWithSameName.id)
             );
-
-            setTimeout(() => setError(null), 5000);
           });
       }
     } else {
-      personService.create(newPerson).then((p) => {
-        setPersons(persons.concat(p));
-        setNewNumber("");
-        setNewName("");
-        setNotification(`Added ${newPerson.name}`);
-      });
+      personService
+        .create(newPerson)
+        .then((p) => {
+          setPersons(persons.concat(p));
+          setNewNumber("");
+          setNewName("");
+          notifyOfSuccess(`Added ${newPerson.name}`);
+        })
+        .catch((err) => {
+          notifyOfError(err.message);
+        });
     }
-
-    setTimeout(() => setNotification(null), 5000);
   };
 
   const deletePersonFromPhoneBook = (deletedPerson) => {
@@ -85,14 +103,12 @@ const App = () => {
           setPersons(persons.filter((person) => person.id !== deletedPerson.id))
         )
         .catch((err) => {
-          setError(
+          notifyOfError(
             `Information of ${deletedPerson.name} has already been removed from server`
           );
           setPersons(
             persons.filter((person) => person.id !== deletedPerson.id)
           );
-
-          setTimeout(() => setError(null), 5000);
         });
     }
   };
