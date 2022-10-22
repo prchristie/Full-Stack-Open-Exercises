@@ -1,34 +1,14 @@
 {
   "persons": [
     {
-      "name": "Dan Abramov",
-      "number": "12-43-234345",
-      "id": 3
-    },
-    {
-      "name": "deez",
-      "number": "123",
-      "id": 5
-    },
-    {
-      "name": "poop willy",
-      "number": "",
-      "id": 6
-    },
-    {
-      "name": "",
-      "number": "",
-      "id": 7
-    },
-    {
-      "name": "dwa",
-      "number": "34532",
-      "id": 9
-    },
-    {
       "name": "ddwa",
       "number": "342",
       "id": 12
+    },
+    {
+      "name": "adaw",
+      "number": "344",
+      "id": 13
     }
   ]
 }

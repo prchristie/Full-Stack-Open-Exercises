@@ -3,12 +3,15 @@ import { NewContactForm as NewPersonForm } from "./components/NewContactForm";
 import { PhoneDirectory } from "./components/PhoneDirectory";
 import personService from "./services/persons";
 import { NameFilterForm } from "./components/NameFilterForm";
+import { Notification } from "./components/Notification";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [nameFilter, setNameFilter] = useState("");
+  const [notification, setNotification] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleNameChange = (event) => setNewName(event.target.value);
 
@@ -29,6 +32,7 @@ const App = () => {
     const newPerson = { name: newName, number: newNumber };
 
     const personWithSameName = findPersonOfName(newPerson.name);
+    console.log(personWithSameName);
 
     if (personWithSameName !== undefined) {
       if (
@@ -46,24 +50,50 @@ const App = () => {
             );
             setNewNumber("");
             setNewName("");
+            setNotification(`Updated ${newPerson.name}`);
+          })
+          .catch((err) => {
+            setError(
+              `Information of ${newPerson.name} has already been removed from server`
+            );
+            setPersons(
+              persons.filter((person) => person.id !== personWithSameName.id)
+            );
+
+            setTimeout(() => setError(null), 5000);
           });
       }
+    } else {
+      personService.create(newPerson).then((p) => {
+        setPersons(persons.concat(p));
+        setNewNumber("");
+        setNewName("");
+        setNotification(`Added ${newPerson.name}`);
+      });
     }
 
-    personService.create(newPerson).then((p) => {
-      setPersons(persons.concat(p));
-      setNewNumber("");
-      setNewName("");
-    });
+    setTimeout(() => setNotification(null), 5000);
   };
 
   const deletePersonFromPhoneBook = (deletedPerson) => {
     const deleteConfirmation = window.confirm(`Delete ${deletedPerson.name}`);
 
     if (deleteConfirmation) {
-      personService.deletePhoneBookEntry(deletedPerson.id);
+      personService
+        .deletePhoneBookEntry(deletedPerson.id)
+        .then((res) =>
+          setPersons(persons.filter((person) => person.id !== deletedPerson.id))
+        )
+        .catch((err) => {
+          setError(
+            `Information of ${deletedPerson.name} has already been removed from server`
+          );
+          setPersons(
+            persons.filter((person) => person.id !== deletedPerson.id)
+          );
 
-      setPersons(persons.filter((person) => person.id !== deletedPerson.id));
+          setTimeout(() => setError(null), 5000);
+        });
     }
   };
 
@@ -75,6 +105,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification} isError={false} />
+      <Notification message={error} isError={true} />
       <NameFilterForm
         handleFilterChange={(e) => setNameFilter(e.target.value)}
         nameFilterValue={nameFilter}
