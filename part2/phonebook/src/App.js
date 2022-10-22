@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { NewContactForm as NewPersonForm } from "./components/NewContactForm";
 import { PhoneDirectory } from "./components/PhoneDirectory";
-import axios from "axios";
+import personService from "./services/persons";
+import { NameFilterForm } from "./components/NameFilterForm";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -13,35 +14,62 @@ const App = () => {
 
   const handleNumberChange = (event) => setNewNumber(event.target.value);
 
-  const doesPhoneBookContainName = (name) =>
-    persons.findIndex((person) => person.name === name) !== -1;
-
-  const addPerson = (person) => {
-    if (doesPhoneBookContainName(person.name)) {
-      alert(`${newName} is already added to the phonebook`);
-      return false;
-    }
-
-    setPersons(persons.concat(person));
-    return true;
-  };
+  const findPersonOfName = (name) =>
+    persons.find((person) => person.name === name);
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
-      setPersons(response.data);
+    personService.getAll().then((persons) => {
+      setPersons(persons);
     });
   }, []);
 
-  const handleNewPersonEvent = (event) => {
+  const handleAddPersonEvent = (event) => {
     event.preventDefault();
-    if (addPerson({ name: newName, number: newNumber })) return;
-    setNewNumber("");
-    setNewName("");
+
+    const newPerson = { name: newName, number: newNumber };
+
+    const personWithSameName = findPersonOfName(newPerson.name);
+
+    if (personWithSameName !== undefined) {
+      if (
+        window.confirm(
+          `${newPerson.name} is already added to phonebook, replace the old number with a new one?`
+        )
+      ) {
+        personService
+          .update(personWithSameName.id, newPerson)
+          .then((updatedPerson) => {
+            setPersons(
+              persons.map((p) =>
+                p.id !== personWithSameName.id ? p : updatedPerson
+              )
+            );
+            setNewNumber("");
+            setNewName("");
+          });
+      }
+    }
+
+    personService.create(newPerson).then((p) => {
+      setPersons(persons.concat(p));
+      setNewNumber("");
+      setNewName("");
+    });
   };
 
-  const filterPersonsByName = () =>
+  const deletePersonFromPhoneBook = (deletedPerson) => {
+    const deleteConfirmation = window.confirm(`Delete ${deletedPerson.name}`);
+
+    if (deleteConfirmation) {
+      personService.deletePhoneBookEntry(deletedPerson.id);
+
+      setPersons(persons.filter((person) => person.id !== deletedPerson.id));
+    }
+  };
+
+  const filterPersonsByName = (name) =>
     persons.filter((person) =>
-      person.name.toLowerCase().includes(nameFilter.toLowerCase())
+      person.name.toLowerCase().includes(name.toLowerCase())
     );
 
   return (
@@ -55,22 +83,18 @@ const App = () => {
       or more inputs. This doenst scale well*/}
       <h3>Add a new</h3>
       <NewPersonForm
-        handleSubmit={handleNewPersonEvent}
+        handleSubmit={handleAddPersonEvent}
         handleNameChange={handleNameChange}
         nameValue={newName}
         handleNumberChange={handleNumberChange}
         numberValue={newNumber}
       />
-      <PhoneDirectory persons={filterPersonsByName()} />
+      <PhoneDirectory
+        persons={filterPersonsByName(nameFilter)}
+        deletePersonCallback={deletePersonFromPhoneBook}
+      />
     </div>
   );
 };
-
-const NameFilterForm = ({ handleFilterChange, nameFilterValue }) => (
-  <div>
-    filter shown with
-    <input type="text" onChange={handleFilterChange} value={nameFilterValue} />
-  </div>
-);
 
 export default App;
