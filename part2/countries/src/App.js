@@ -12,9 +12,10 @@ function App() {
   const [filteredCountries, setFilteredCountries] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("https://restcountries.com/v3.1/all")
-      .then((response) => setCountries(response.data));
+    axios.get("https://restcountries.com/v3.1/all").then((response) => {
+      setFilteredCountries(response.data);
+      return setCountries(response.data);
+    });
   }, []);
 
   const filterCountriesByName = (name) =>
