@@ -70,7 +70,6 @@ const App = () => {
             notifyOfSuccess(`Updated ${newPerson.name}`);
           })
           .catch((err) => {
-            console.log(err.response);
             if (err.response.status === 404) {
               notifyOfError(
                 `Information of ${newPerson.name} has already been removed from server`
@@ -110,7 +109,6 @@ const App = () => {
           setPersons(persons.filter((person) => person.id !== deletedPerson.id))
         )
         .catch((err) => {
-          console.log(err);
           notifyOfError(err.message);
         });
     }

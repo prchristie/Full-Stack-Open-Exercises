@@ -92,21 +92,6 @@ app.put("/api/persons/:id", (request, response, next) => {
 app.post("/api/persons", (request, response, next) => {
   const body = request.body;
 
-  let errors = [];
-  if (!body.name) {
-    errors = errors.concat("name missing");
-  }
-
-  if (!body.number) {
-    errors = errors.concat("number missing");
-  }
-
-  if (errors.length > 0) {
-    return response.status(404).json({
-      errors: errors,
-    });
-  }
-
   const newPerson = new Person({
     name: body.name,
     number: body.number,
@@ -115,7 +100,12 @@ app.post("/api/persons", (request, response, next) => {
   newPerson
     .save()
     .then((savedPerson) => response.json(savedPerson))
-    .catch((e) => next(e));
+    .catch((e) => {
+      if (e.name === "MongoServerError") {
+        return response.status(400).json({ error: "Name is not unique" });
+      }
+      next(e);
+    });
 });
 
 app.get("/info", (request, response) => {

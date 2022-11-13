@@ -13,8 +13,32 @@ const personSchema = mongoose.Schema({
   name: {
     type: String,
     minLength: 3,
+    unique: true,
+    required: true,
   },
-  number: String,
+  number: {
+    type: String,
+    minLength: 8,
+    required: true,
+    validate: (val) => {
+      if (/^\d+$/.test(val)) {
+        // if entire thing is a num - valid
+        return true;
+      } else if (val.includes("-")) {
+        // if the value contains a -, check that either side of it is entirely a number and the length of the left side
+        // if 2 or 3
+        const [left, right] = val.split("-", 2);
+        console.log(left, right);
+        return (
+          /^\d+$/.test(left) &&
+          /^\d+$/.test(right) &&
+          (left.length == 2 || left.length == 3)
+        );
+      }
+
+      return false;
+    },
+  },
 });
 
 personSchema.set("toJSON", {
