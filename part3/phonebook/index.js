@@ -103,10 +103,14 @@ app.post("/api/persons", (request, response) => {
 });
 
 app.get("/info", (request, response) => {
-  response.send(
-    `<p>Phonebook has info for ${persons.length} people</p>
+  Person.count()
+    .then((num) =>
+      response.send(
+        `<p>Phonebook has info for ${num} people</p>
     <p>${new Date()}</p>`
-  );
+      )
+    )
+    .catch((e) => next(e));
 });
 
 const errorHandler = (error, request, response, next) => {
