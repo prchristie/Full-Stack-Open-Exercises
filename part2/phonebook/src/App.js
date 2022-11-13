@@ -70,12 +70,19 @@ const App = () => {
             notifyOfSuccess(`Updated ${newPerson.name}`);
           })
           .catch((err) => {
-            notifyOfError(
-              `Information of ${newPerson.name} has already been removed from server`
-            );
-            setPersons(
-              persons.filter((person) => person.id !== personWithSameName.id)
-            );
+            console.log(err.response);
+            if (err.response.status === 404) {
+              notifyOfError(
+                `Information of ${newPerson.name} has already been removed from server`
+              );
+              setPersons(
+                persons.filter((person) => person.id !== personWithSameName.id)
+              );
+            } else if (err.response.status === 400) {
+              notifyOfError(err.response.data.error);
+            } else {
+              notifyOfError(err.message);
+            }
           });
       }
     } else {
@@ -88,7 +95,7 @@ const App = () => {
           notifyOfSuccess(`Added ${newPerson.name}`);
         })
         .catch((err) => {
-          notifyOfError(err.message);
+          notifyOfError(err.response.data.error);
         });
     }
   };
@@ -103,20 +110,16 @@ const App = () => {
           setPersons(persons.filter((person) => person.id !== deletedPerson.id))
         )
         .catch((err) => {
-          notifyOfError(
-            `Information of ${deletedPerson.name} has already been removed from server`
-          );
-          setPersons(
-            persons.filter((person) => person.id !== deletedPerson.id)
-          );
+          console.log(err);
+          notifyOfError(err.message);
         });
     }
   };
 
   const filterPersonsByName = (name) =>
-    persons.filter((person) =>
-      person.name.toLowerCase().includes(name.toLowerCase())
-    );
+    persons.filter((person) => {
+      return person.name.toLowerCase().includes(name.toLowerCase());
+    });
 
   return (
     <div>
