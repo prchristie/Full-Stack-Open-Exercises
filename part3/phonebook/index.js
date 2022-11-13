@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
+const Person = require("./models/person");
 
 app = express();
 app.use(express.json());
@@ -44,25 +45,23 @@ let persons = [
 ];
 
 app.get("/api/persons", (request, response) => {
-  response.json(persons);
+  Person.find({}).then((persons) => response.json(persons));
 });
 
-app.get("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const person = persons.find((p) => p.id === id);
-
-  if (person) {
-    response.json(person);
-  } else {
-    response.status(404).end();
-  }
+app.get("/api/persons/:id", (request, response, next) => {
+  const id = request.params.id;
+  Person.findById({ _id: id })
+    .then((p) => {
+      console.log(p);
+      response.json(p);
+    })
+    .catch((e) => next(e));
 });
 
-app.delete("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  persons = persons.filter((p) => p.id !== id);
-
-  response.status(204).end();
+app.delete("/api/persons/:id", (request, response, next) => {
+  Person.findByIdAndDelete(request.params.id)
+    .then((res) => response.status(204).end())
+    .catch((e) => next(e));
 });
 
 app.post("/api/persons", (request, response) => {
@@ -71,8 +70,6 @@ app.post("/api/persons", (request, response) => {
   let errors = [];
   if (!body.name) {
     errors = errors.concat("name missing");
-  } else if (persons.find((p) => p.name == body.name)) {
-    errors = errors.concat("name must be unique");
   }
 
   if (!body.number) {
@@ -85,15 +82,12 @@ app.post("/api/persons", (request, response) => {
     });
   }
 
-  const newPerson = {
-    id: Math.floor(Math.random() * 100000000),
+  const newPerson = new Person({
     name: body.name,
     number: body.number,
-  };
+  });
 
-  persons = persons.concat(newPerson);
-
-  response.json(newPerson);
+  newPerson.save().then((savedPerson) => response.json(savedPerson));
 });
 
 app.get("/info", (request, response) => {
@@ -103,7 +97,25 @@ app.get("/info", (request, response) => {
   );
 });
 
+const errorHandler = (error, request, response, next) => {
+  /* Don't really know what I'm meant to do in the error handler */
+  console.error(error.message);
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  }
+
+  next(error);
+};
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: "unknown endpoint" });
+};
+
+app.use(unknownEndpoint);
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
