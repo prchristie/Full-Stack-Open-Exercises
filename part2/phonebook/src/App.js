@@ -94,7 +94,7 @@ const App = () => {
   };
 
   const deletePersonFromPhoneBook = (deletedPerson) => {
-    const deleteConfirmation = window.confirm(`Delete ${deletedPerson.name}`);
+    const deleteConfirmation = window.confirm(`Delete ${deletedPerson.name}?`);
 
     if (deleteConfirmation) {
       personService

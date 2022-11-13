@@ -2,8 +2,18 @@
   "persons": [
     {
       "name": "adaw",
-      "number": "344",
-      "id": 13
+      "number": "543534",
+      "id": 1
+    },
+    {
+      "name": "adaw",
+      "number": "765856",
+      "id": 2
+    },
+    {
+      "name": "Edsger Dijkstra",
+      "number": "_",
+      "id": 3
     }
   ]
 }
