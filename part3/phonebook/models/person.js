@@ -6,8 +6,10 @@ console.log("Connecting to", url);
 
 mongoose
   .connect(url)
-  .then((res) => console.log("Connected to MongoDB"))
+  .then(() => console.log("Connected to MongoDB"))
   .catch((e) => console.log(e.message));
+
+const isNumeric = (value) => /^\d+$/.test(value);
 
 const personSchema = mongoose.Schema({
   name: {
@@ -21,18 +23,19 @@ const personSchema = mongoose.Schema({
     minLength: 8,
     required: true,
     validate: (val) => {
-      if (/^\d+$/.test(val)) {
+      if (isNumeric(val)) {
         // if entire thing is a num - valid
         return true;
       } else if (val.includes("-")) {
         // if the value contains a -, check that either side of it is entirely a number and the length of the left side
         // if 2 or 3
-        const [left, right] = val.split("-", 2);
-        console.log(left, right);
+        const [left, ...rest] = val.split("-");
+        const right = rest.join("-");
         return (
-          /^\d+$/.test(left) &&
-          /^\d+$/.test(right) &&
-          (left.length == 2 || left.length == 3)
+          isNumeric(left) &&
+          isNumeric(right) &&
+          (left.length === 2 || left.length === 3) &&
+          left.length + right.length >= 8
         );
       }
 
