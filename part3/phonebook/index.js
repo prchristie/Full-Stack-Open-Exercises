@@ -11,7 +11,7 @@ app.use(
       tokens.method(req, res),
       tokens.url(req, res),
       tokens.status(req, res),
-      tokens.res(req, res, "content-length"),
+      tokens.res(req, res, "content-length") || "0",
       "-",
       tokens["response-time"](req, res),
       "ms",
@@ -89,7 +89,7 @@ app.get("/info", (request, response, next) => {
   Person.count()
     .then((num) =>
       response.send(
-        `<p>Phonebook has info for ${num} people</p>
+        `<p>Phonebook has info for ${num} ${num === 1 ? "person" : "people"}</p>
     <p>${new Date()}</p>`
       )
     )
