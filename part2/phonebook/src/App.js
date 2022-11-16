@@ -20,7 +20,7 @@ const App = () => {
   const findPersonOfName = (name) =>
     persons.find((person) => person.name === name);
 
-  useEffect(() => {
+  const loadPhonebook = () =>
     personService
       .getAll()
       .then((persons) => {
@@ -29,6 +29,9 @@ const App = () => {
       .catch((err) => {
         notifyOfError(err.message);
       });
+
+  useEffect(() => {
+    loadPhonebook();
   }, []);
 
   const notify = (msg, isError) => {
@@ -44,6 +47,35 @@ const App = () => {
   const notifyOfError = (msg) => notify(msg, true);
   const notifyOfSuccess = (msg) => notify(msg, false);
 
+  const tryUpdatePerson = (person, id) => {
+    if (
+      window.confirm(
+        `${person.name} is already added to phonebook, replace the old number with a new one?`
+      )
+    ) {
+      personService
+        .update(id, person)
+        .then((updatedPerson) => {
+          setPersons(persons.map((p) => (p.id !== id ? p : updatedPerson)));
+          setNewNumber("");
+          setNewName("");
+          notifyOfSuccess(`Updated ${person.name}`);
+        })
+        .catch((err) => {
+          if (err.response.status === 404) {
+            notifyOfError(
+              `Information of ${person.name} has already been removed from server`
+            );
+            setPersons(persons.filter((person) => person.id !== id));
+          } else if (err.response.status === 400) {
+            notifyOfError(err.response.data.error);
+          } else {
+            notifyOfError(err.message);
+          }
+        });
+    }
+  };
+
   const handleAddPersonEvent = (event) => {
     event.preventDefault();
 
@@ -52,38 +84,7 @@ const App = () => {
     const personWithSameName = findPersonOfName(newPerson.name);
 
     if (personWithSameName !== undefined) {
-      if (
-        window.confirm(
-          `${newPerson.name} is already added to phonebook, replace the old number with a new one?`
-        )
-      ) {
-        personService
-          .update(personWithSameName.id, newPerson)
-          .then((updatedPerson) => {
-            setPersons(
-              persons.map((p) =>
-                p.id !== personWithSameName.id ? p : updatedPerson
-              )
-            );
-            setNewNumber("");
-            setNewName("");
-            notifyOfSuccess(`Updated ${newPerson.name}`);
-          })
-          .catch((err) => {
-            if (err.response.status === 404) {
-              notifyOfError(
-                `Information of ${newPerson.name} has already been removed from server`
-              );
-              setPersons(
-                persons.filter((person) => person.id !== personWithSameName.id)
-              );
-            } else if (err.response.status === 400) {
-              notifyOfError(err.response.data.error);
-            } else {
-              notifyOfError(err.message);
-            }
-          });
-      }
+      tryUpdatePerson(newPerson, personWithSameName.id);
     } else {
       personService
         .create(newPerson)
@@ -94,6 +95,12 @@ const App = () => {
           notifyOfSuccess(`Added ${newPerson.name}`);
         })
         .catch((err) => {
+          if (err.response.status === 400) {
+            // means the name was added on another instance, but we dont have the name locally and so can't get the id.
+            // Seems like we need a getPersonByName functionality on the backend to prevent having to reload all the
+            // data
+            loadPhonebook();
+          }
           notifyOfError(err.response.data.error);
         });
     }
