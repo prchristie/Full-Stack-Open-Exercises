@@ -35,7 +35,7 @@ const addNewPerson = (name, number) => {
 
   return person
     .save()
-    .then((result) => {
+    .then(() => {
       console.log(`added ${name} number ${number} to phonebook`);
     })
     .catch((e) => console.log(e));
@@ -43,15 +43,15 @@ const addNewPerson = (name, number) => {
 
 mongoose
   .connect(url)
-  .then((res) => {
+  .then(() => {
     if (process.argv.length > 4) {
       const name = process.argv[3];
       const number = process.argv[4];
       return addNewPerson(name, number);
-    } else if (process.argv.length == 3) {
+    } else if (process.argv.length === 3) {
       return displayAllEntries();
     }
   })
-  .finally((res) => {
+  .finally(() => {
     return mongoose.connection.close();
   });
