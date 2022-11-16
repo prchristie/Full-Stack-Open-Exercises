@@ -22,24 +22,27 @@ const personSchema = mongoose.Schema({
     type: String,
     minLength: 8,
     required: true,
-    validate: (val) => {
-      if (isNumeric(val)) {
-        // if entire thing is a num - valid
-        return true;
-      } else if (val.includes("-")) {
-        // if the value contains a -, check that either side of it is entirely a number and the length of the left side
-        // if 2 or 3
-        const [left, ...rest] = val.split("-");
-        const right = rest.join("-");
-        return (
-          isNumeric(left) &&
-          isNumeric(right) &&
-          (left.length === 2 || left.length === 3) &&
-          left.length + right.length >= 8
-        );
-      }
+    validate: {
+      validator: (val) => {
+        if (isNumeric(val)) {
+          // if entire thing is a num - valid
+          return true;
+        } else if (val.includes("-")) {
+          // if the value contains a -, check that either side of it is entirely a number and the length of the left side
+          // if 2 or 3
+          const [left, ...rest] = val.split("-");
+          const right = rest.join("-");
+          return (
+            isNumeric(left) &&
+            isNumeric(right) &&
+            (left.length === 2 || left.length === 3) &&
+            left.length + right.length >= 8
+          );
+        }
 
-      return false;
+        return false;
+      },
+      message: (props) => `${props.value} is not a valid phone number.`,
     },
   },
 });
