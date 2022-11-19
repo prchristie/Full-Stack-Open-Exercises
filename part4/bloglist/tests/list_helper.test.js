@@ -202,3 +202,50 @@ describe("most blogs", () => {
     });
   });
 });
+
+describe("most likes", () => {
+  test("of an empty array is null", () => {
+    const result = listHelper.mostLikes([]);
+    expect(result).toBe(null);
+  });
+
+  test("of a single blog is that blog and its number of likes", () => {
+    const result = listHelper.mostLikes(listWithOneBlog);
+    expect(result).toEqual({ author: "Edsger W. Dijkstra", likes: 5 });
+  });
+
+  test("of a bigger array is the blog with the most total likes", () => {
+    const result = listHelper.mostLikes(blogs);
+    expect(result).toEqual({
+      author: "Edsger W. Dijkstra",
+      likes: 17,
+    });
+  });
+
+  const multipleAuthorsWithMostLikes = [
+    {
+      _id: "5a422a851b54a676234d17f7",
+      title: "React patterns",
+      author: "Michael Chan",
+      url: "https://reactpatterns.com/",
+      likes: 7,
+      __v: 0,
+    },
+    {
+      _id: "5a422aa71b54a676234d17f8",
+      title: "Go To Statement Considered Harmful",
+      author: "Edsger W. Dijkstra",
+      url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
+      likes: 7,
+      __v: 0,
+    },
+  ];
+
+  test("of an array with multiple authors with the same amount of most likes returns the first author", () => {
+    const result = listHelper.mostLikes(multipleAuthorsWithMostLikes);
+    expect(result).toEqual({
+      author: "Michael Chan",
+      likes: 7,
+    });
+  });
+});
