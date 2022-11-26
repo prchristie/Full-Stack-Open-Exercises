@@ -46,16 +46,31 @@ test("a valid blog is created", async () => {
 });
 
 test("blogs default to 0 likes when created without a like amount", async () => {
-  const response = await api
-    .post("/api/blogs")
-    .send({
-      title: "New Title",
-      author: "Author",
-      url: "https://stackoverflow.com",
-    })
-    .expect(201);
+  const newBlog = {
+    title: "New Title",
+    author: "Author",
+    url: "https://stackoverflow.com",
+  };
+  const response = await api.post("/api/blogs").send(newBlog).expect(201);
 
   expect(response.body.likes).toBe(0);
+});
+
+test("a blog without a title is responded with 400 bad request", async () => {
+  const newBlog = {
+    author: "John Dorian",
+    url: "https://www.stackoverflow.com",
+  };
+
+  await api.post("/api/blogs").send(newBlog).expect(400);
+});
+test("a blog without a url is responded with 400 bad request", async () => {
+  const newBlog = {
+    title: "New Title",
+    author: "John Dorian",
+  };
+
+  await api.post("/api/blogs").send(newBlog).expect(400);
 });
 
 afterAll(() => {
