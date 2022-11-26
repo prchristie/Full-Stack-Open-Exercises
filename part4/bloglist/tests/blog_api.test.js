@@ -25,6 +25,39 @@ test("blogs have their unique identifier in property id", async () => {
   response.body.map((blog) => expect(blog.id).toBeDefined());
 });
 
+test("a valid blog is created", async () => {
+  const newBlog = {
+    title: "Hello World!",
+    author: "John Dorian",
+    url: "https://www.stackoverflow.com",
+    likes: 10,
+  };
+  const response = await api.post("/api/blogs").send(newBlog).expect(201);
+
+  const notesAtEnd = await helper.blogsInDb();
+  expect(notesAtEnd.length).toBe(helper.initialBlogs.length + 1);
+  expect(response.body).toEqual({
+    title: "Hello World!",
+    author: "John Dorian",
+    url: "https://www.stackoverflow.com",
+    likes: 10,
+    id: response.body.id,
+  });
+});
+
+test("blogs default to 0 likes when created without a like amount", async () => {
+  const response = await api
+    .post("/api/blogs")
+    .send({
+      title: "New Title",
+      author: "Author",
+      url: "https://stackoverflow.com",
+    })
+    .expect(201);
+
+  expect(response.body.likes).toBe(0);
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
