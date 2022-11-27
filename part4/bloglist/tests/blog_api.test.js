@@ -9,70 +9,118 @@ const api = supertest(app);
 beforeEach(async () => {
   await Blog.deleteMany({});
 
-  const blogObjects = helper.initialBlogs.map((blog) => new Blog(blog));
-  const promiseArray = blogObjects.map((blog) => blog.save());
-  await Promise.all(promiseArray);
+  await Blog.insertMany(helper.initialBlogs);
 });
 
-test("all blogs are returned from get request", async () => {
-  const response = await api.get("/api/blogs");
-  expect(response.body).toHaveLength(helper.initialBlogs.length);
-});
+describe("when retrieving blogs", () => {
+  test("all blogs are returned", async () => {
+    const response = await api.get("/api/blogs");
+    expect(response.body).toHaveLength(helper.initialBlogs.length);
+  });
+  test("blogs have their unique identifier in property id", async () => {
+    const response = await api.get("/api/blogs");
 
-test("blogs have their unique identifier in property id", async () => {
-  const response = await api.get("/api/blogs");
-
-  response.body.map((blog) => expect(blog.id).toBeDefined());
-});
-
-test("a valid blog is created", async () => {
-  const newBlog = {
-    title: "Hello World!",
-    author: "John Dorian",
-    url: "https://www.stackoverflow.com",
-    likes: 10,
-  };
-  const response = await api.post("/api/blogs").send(newBlog).expect(201);
-
-  const notesAtEnd = await helper.blogsInDb();
-  expect(notesAtEnd.length).toBe(helper.initialBlogs.length + 1);
-  expect(response.body).toEqual({
-    title: "Hello World!",
-    author: "John Dorian",
-    url: "https://www.stackoverflow.com",
-    likes: 10,
-    id: response.body.id,
+    response.body.map((blog) => expect(blog.id).toBeDefined());
   });
 });
 
-test("blogs default to 0 likes when created without a like amount", async () => {
-  const newBlog = {
+describe("creating a new blog", () => {
+  test("succeeds with a valid blog", async () => {
+    const newBlog = {
+      title: "Hello World!",
+      author: "John Dorian",
+      url: "https://www.stackoverflow.com",
+      likes: 10,
+    };
+    const response = await api.post("/api/blogs").send(newBlog).expect(201);
+
+    const notesAtEnd = await helper.blogsInDb();
+    expect(notesAtEnd).toHaveLength(helper.initialBlogs.length + 1);
+    expect(response.body).toEqual({
+      title: "Hello World!",
+      author: "John Dorian",
+      url: "https://www.stackoverflow.com",
+      likes: 10,
+      id: response.body.id,
+    });
+  });
+  test("defaults to 0 likes when created without a like amount", async () => {
+    const newBlog = {
+      title: "New Title",
+      author: "Author",
+      url: "https://stackoverflow.com",
+    };
+    const response = await api.post("/api/blogs").send(newBlog).expect(201);
+
+    expect(response.body.likes).toBe(0);
+  });
+  test("fails with status code 400 without a title", async () => {
+    const newBlog = {
+      author: "John Dorian",
+      url: "https://www.stackoverflow.com",
+    };
+
+    await api.post("/api/blogs").send(newBlog).expect(400);
+  });
+  test("fails with status code 400 without a url", async () => {
+    const newBlog = {
+      title: "New Title",
+      author: "John Dorian",
+    };
+
+    await api.post("/api/blogs").send(newBlog).expect(400);
+  });
+});
+
+describe("deletion of a note", () => {
+  test("succeeds with status code 204 if id is valid", async () => {
+    const blogsAtStart = await helper.blogsInDb();
+    const blogToDelete = blogsAtStart[0];
+
+    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+
+    const blogsAtEnd = await helper.blogsInDb();
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length - 1);
+
+    const ids = blogsAtEnd.map((n) => n.id);
+    expect(ids).not.toContain(blogToDelete.id);
+  });
+
+  test("fails with status code 400 if id is invalid", async () => {
+    const invalidId = "Invalid";
+
+    await api.delete(`/api/blogs/${invalidId}`).expect(400);
+  });
+});
+
+describe("updating an existing note", () => {
+  const updateBlog = {
     title: "New Title",
-    author: "Author",
-    url: "https://stackoverflow.com",
+    author: "Bob Smith",
+    url: "https://facebook.com",
+    likes: 12345,
   };
-  const response = await api.post("/api/blogs").send(newBlog).expect(201);
+  test("succeeds with status code 200 if valid blog", async () => {
+    const blogToUpdate = await helper.firstBlog();
 
-  expect(response.body.likes).toBe(0);
+    const response = await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(updateBlog)
+      .expect(200);
+    const updatedBlogFromApi = response.body;
+
+    const updatedBlogFromDb = await helper.firstBlog();
+
+    expect(updatedBlogFromApi).toEqual(updatedBlogFromDb);
+    expect(updatedBlogFromApi.likes).toBe(updateBlog.likes);
+    expect(updatedBlogFromDb.likes).toBe(updateBlog.likes);
+  });
+
+  test("fails with status code 404 if blog doesn't exist", async () => {
+    const nonExistingId = await helper.nonExistingId();
+    await api.put(`/api/blogs/${nonExistingId}`).expect(404);
+  });
 });
-
-test("a blog without a title is responded with 400 bad request", async () => {
-  const newBlog = {
-    author: "John Dorian",
-    url: "https://www.stackoverflow.com",
-  };
-
-  await api.post("/api/blogs").send(newBlog).expect(400);
-});
-test("a blog without a url is responded with 400 bad request", async () => {
-  const newBlog = {
-    title: "New Title",
-    author: "John Dorian",
-  };
-
-  await api.post("/api/blogs").send(newBlog).expect(400);
-});
-
 afterAll(() => {
   mongoose.connection.close();
 });
