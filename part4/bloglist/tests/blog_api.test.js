@@ -12,7 +12,7 @@ beforeEach(async () => {
   await Blog.insertMany(helper.initialBlogs);
 });
 
-describe("when retrieving blogs", () => {
+describe("when getting blogs", () => {
   test("all blogs are returned", async () => {
     const response = await api.get("/api/blogs");
     expect(response.body).toHaveLength(helper.initialBlogs.length);
@@ -25,13 +25,14 @@ describe("when retrieving blogs", () => {
 });
 
 describe("creating a new blog", () => {
+  const newBlog = {
+    title: "Hello World!",
+    author: "John Dorian",
+    url: "https://www.stackoverflow.com",
+    likes: 10,
+  };
+
   test("succeeds with a valid blog", async () => {
-    const newBlog = {
-      title: "Hello World!",
-      author: "John Dorian",
-      url: "https://www.stackoverflow.com",
-      likes: 10,
-    };
     const response = await api.post("/api/blogs").send(newBlog).expect(201);
 
     const notesAtEnd = await helper.blogsInDb();
@@ -44,16 +45,21 @@ describe("creating a new blog", () => {
       id: response.body.id,
     });
   });
-  test("defaults to 0 likes when created without a like amount", async () => {
-    const newBlog = {
-      title: "New Title",
-      author: "Author",
-      url: "https://stackoverflow.com",
+
+  test("returns the new blog", async () => {});
+
+  test("defaults to 0 likes when created without a likes amount", async () => {
+    const noLikesBlog = {
+      title: "Hello World!",
+      author: "John Dorian",
+      url: "https://www.stackoverflow.com",
     };
-    const response = await api.post("/api/blogs").send(newBlog).expect(201);
+
+    const response = await api.post("/api/blogs").send(noLikesBlog).expect(201);
 
     expect(response.body.likes).toBe(0);
   });
+
   test("fails with status code 400 without a title", async () => {
     const newBlog = {
       author: "John Dorian",
@@ -62,6 +68,7 @@ describe("creating a new blog", () => {
 
     await api.post("/api/blogs").send(newBlog).expect(400);
   });
+
   test("fails with status code 400 without a url", async () => {
     const newBlog = {
       title: "New Title",
@@ -84,6 +91,14 @@ describe("deletion of a note", () => {
 
     const ids = blogsAtEnd.map((n) => n.id);
     expect(ids).not.toContain(blogToDelete.id);
+  });
+
+  test("succeeds with status code 204 even if the id doesn't exist", async () => {
+    const id = await helper.nonExistingId();
+
+    await api.delete(`/api/blogs/${id}`).expect(204);
+
+    expect(await helper.blogsInDb()).toHaveLength(helper.initialBlogs.length);
   });
 
   test("fails with status code 400 if id is invalid", async () => {
