@@ -3,9 +3,11 @@ require("express-async-errors");
 const config = require("./utils/config");
 const mongoose = require("mongoose");
 const blogsRouter = require("./controllers/blog");
+const usersRouter = require("./controllers/users");
 const cors = require("cors");
 const logger = require("./utils/logger");
 const invalidIdErrorHandler = require("./utils/middleware");
+const morgan = require("morgan");
 
 const app = express();
 
@@ -20,8 +22,10 @@ mongoose
 
 app.use(cors());
 app.use(express.json());
+app.use(morgan("dev"));
 
 app.use("/api/blogs", blogsRouter);
+app.use("/api/users", usersRouter);
 
 app.use(invalidIdErrorHandler);
 
