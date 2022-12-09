@@ -6,9 +6,24 @@ const invalidIdErrorHandler = (error, request, response, next) => {
       error: error.message,
     });
   }
-  console.log(error.stack);
 
-  next(error);
+  next();
 };
 
-module.exports = invalidIdErrorHandler;
+const getTokenFrom = (request) => {
+  const authorization = request.get("authorization");
+  if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
+    return authorization.substring(7);
+  }
+  return null;
+};
+
+const tokenExtractor = (request, response, next) => {
+  const token = getTokenFrom(request);
+
+  request.token = token;
+
+  next();
+};
+
+module.exports = { invalidIdErrorHandler, tokenExtractor };

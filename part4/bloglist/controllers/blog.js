@@ -9,20 +9,20 @@ blogRouter.get("/", async (request, response) => {
   response.json(blogs);
 });
 
-const getTokenFrom = (request) => {
-  const authorization = request.get("authorization");
-  if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
-    return authorization.substring(7);
-  }
-  return null;
-};
-
 blogRouter.post("/", async (request, response) => {
   const { title, author, url, likes } = request.body;
 
-  const token = getTokenFrom(request);
-  console.log(token);
-  const decodedToken = jwt.verify(token, process.env.SECRET);
+  var decodedToken = null;
+  try {
+    decodedToken = jwt.verify(request.token, process.env.SECRET);
+  } catch (e) {
+    if (e.name === "TokenExpiredError") {
+      return response.status(401).json({ error: "token expired" });
+    }
+
+    throw e;
+  }
+
   if (!decodedToken.id) {
     return response.status(401).json({
       error: "token missing or invalid",
