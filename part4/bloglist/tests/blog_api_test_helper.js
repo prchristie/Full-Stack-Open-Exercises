@@ -1,4 +1,7 @@
 const Blog = require("../models/blog");
+const ObjectId = require("mongodb").ObjectId;
+
+const randomId = () => ObjectId().toString();
 
 const initialBlogs = [
   {
@@ -56,23 +59,10 @@ const firstBlog = async () => {
   return blogs[0].toJSON();
 };
 
-const nonExistingId = async () => {
-  const blog = new Blog({
-    title: "willremovesoon",
-    author: "willremovesoon",
-    url: "willremovesoon",
-    likes: 0,
-  });
-  await blog.save();
-  await blog.remove();
-
-  return blog._id.toString();
-};
-
 module.exports = {
   initialBlogs,
   blogsInDb,
   blogWithId,
   firstBlog,
-  nonExistingId,
+  randomId,
 };

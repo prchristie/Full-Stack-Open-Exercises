@@ -3,7 +3,7 @@ require("express-async-errors");
 const config = require("./utils/config");
 const mongoose = require("mongoose");
 const blogsRouter = require("./controllers/blog");
-const usersRouter = require("./controllers/users");
+const usersRouter = require("./controllers/user");
 const cors = require("cors");
 const logger = require("./utils/logger");
 const invalidIdErrorHandler = require("./utils/middleware");
