@@ -31,5 +31,6 @@ app.use("/api/users", usersRouter);
 app.use("/api/login", loginRouter);
 
 app.use(middleware.invalidIdErrorHandler);
+app.use(middleware.unknownEndpoint);
 
 module.exports = app;
