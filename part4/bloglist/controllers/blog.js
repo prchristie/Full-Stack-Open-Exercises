@@ -1,6 +1,4 @@
 const Blog = require("../models/blog");
-const User = require("../models/user");
-const jwt = require("jsonwebtoken");
 const blogRouter = require("express").Router();
 
 blogRouter.get("/", async (request, response) => {
@@ -11,25 +9,12 @@ blogRouter.get("/", async (request, response) => {
 
 blogRouter.post("/", async (request, response) => {
   const { title, author, url, likes } = request.body;
+  const user = request.user;
 
-  var decodedToken = null;
-  try {
-    decodedToken = jwt.verify(request.token, process.env.SECRET);
-  } catch (e) {
-    if (e.name === "TokenExpiredError") {
-      return response.status(401).json({ error: "token expired" });
-    }
-
-    throw e;
+  if (!user) {
+    response.status(404).json({ error: "missing token" });
   }
 
-  if (!decodedToken.id) {
-    return response.status(401).json({
-      error: "token missing or invalid",
-    });
-  }
-
-  const user = await User.findById(decodedToken.id);
   const blog = new Blog({ title, author, url, likes, user: user._id });
 
   const savedBlog = await blog.save();
@@ -59,27 +44,13 @@ blogRouter.put("/:id", async (request, response) => {
 });
 
 blogRouter.delete("/:id", async (request, response) => {
-  var decodedToken = null;
-  try {
-    decodedToken = jwt.verify(request.token, process.env.SECRET);
-  } catch (e) {
-    if (e.name === "TokenExpiredError") {
-      return response.status(401).json({ error: "token expired" });
-    }
-
-    throw e;
-  }
-  if (!decodedToken.id) {
-    return response.status(401).json({
-      error: "token missing or invalid",
-    });
-  }
-
   const id = request.params.id;
+  const user = request.user;
+  console.log(user);
 
   const blog = await Blog.findById(id);
 
-  if (blog.user._id.toString() !== decodedToken.id) {
+  if (blog.user._id.toString() !== user.id) {
     return response.status(401).json({
       error: "user doesn't own blog",
     });
