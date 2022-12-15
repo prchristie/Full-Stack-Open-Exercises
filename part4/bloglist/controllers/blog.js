@@ -12,7 +12,7 @@ blogRouter.post("/", async (request, response) => {
   const user = request.user;
 
   if (!user) {
-    response.status(404).json({ error: "missing token" });
+    return response.status(401).json({ error: "missing token" });
   }
 
   const blog = new Blog({ title, author, url, likes, user: user._id });

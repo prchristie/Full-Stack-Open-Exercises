@@ -8,9 +8,11 @@ const invalidIdErrorHandler = (error, request, response, next) => {
     return response.status(400).json({
       error: error.message,
     });
+  } else if (error.name === "JsonWebTokenError") {
+    return response.status(401).json({ error: "invalid token" });
   }
 
-  next();
+  next(error);
 };
 
 const getTokenFrom = (request) => {
@@ -57,6 +59,7 @@ const userExtractor = async (request, response, next) => {
 };
 
 const unknownEndpoint = (request, response) => {
+  console.log("bye");
   response.status(404).send({ error: "unknown endpoint" });
 };
 
