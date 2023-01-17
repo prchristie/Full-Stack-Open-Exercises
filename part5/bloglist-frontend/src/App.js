@@ -1,16 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Blog from "./components/Blog";
 import { Notification } from "./components/Notification";
 import LoginForm from "./components/LoginForm";
-import { NewNoteForm } from "./components/NewNoteForm";
+import { BlogForm } from "./components/NewNoteForm";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
+import Togglable from "./components/Togglable";
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [user, setUser] = useState(null);
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
   const [notificationMessage, setNotificationMessage] = useState(null);
   const [isError, setIsError] = useState(false);
 
@@ -45,15 +44,13 @@ const App = () => {
     </>
   );
 
-  const handleLogin = async (event) => {
-    event.preventDefault();
+  const handleLogin = async (username, password) => {
     try {
       const user = await loginService.login({ username, password });
       blogService.setToken(user.token);
       window.localStorage.setItem("user", JSON.stringify(user));
       setUser(user);
-      setPassword("");
-      setUsername("");
+      displayNotification("Successfully logged in!", false);
     } catch (e) {
       displayNotification("wrong username or password", true);
     }
@@ -64,7 +61,8 @@ const App = () => {
     setUser(null);
   };
 
-  const createNewBlog = async (title, author, url) => {
+  const newNoteRef = useRef();
+  const createNewBlog = async ({ title, author, url }) => {
     const newBlog = {
       title,
       author,
@@ -78,6 +76,7 @@ const App = () => {
         `a new blog ${blog.title} by ${blog.author} added`,
         false
       );
+      newNoteRef.current.toggleVisibility();
     } catch (e) {
       if (e.response.data.error === "invalid token") {
         displayNotification("You have been logged out", true);
@@ -88,44 +87,37 @@ const App = () => {
     }
   };
 
-  console.log(notificationMessage);
-  return (
-    <>
-      {user !== null ? (
-        <div>
-          <h2>blogs</h2>
-          {notificationMessage && (
-            <Notification message={notificationMessage} isError={isError} />
-          )}
-          <div>
-            <p>
-              {user.username} logged in
-              <button onClick={(e) => logout()}>logout</button>
-            </p>
-          </div>
-          <div>
-            <h2>create new</h2>
-            <NewNoteForm onNewBlogCreated={createNewBlog} />
-          </div>
-          <div>{blogList()}</div>
-        </div>
-      ) : (
-        <>
-          <h2>log in to application</h2>
-          {notificationMessage && (
-            <Notification message={notificationMessage} isError={isError} />
-          )}
-          <LoginForm
-            handleLogin={handleLogin}
-            username={username}
-            password={password}
-            setUsername={setUsername}
-            setPassword={setPassword}
-          />
-        </>
+  const loggedInView = () => (
+    <div>
+      <h2>blogs</h2>
+      {notificationMessage && (
+        <Notification message={notificationMessage} isError={isError} />
       )}
+      <div>
+        <p>
+          {user.username} logged in
+          <button onClick={(e) => logout()}>logout</button>
+        </p>
+      </div>
+      <Togglable buttonLabel="new note" ref={newNoteRef}>
+        <h2>create new</h2>
+        <BlogForm createBlog={createNewBlog} />
+      </Togglable>
+      <div>{blogList()}</div>
+    </div>
+  );
+
+  const loginForm = () => (
+    <>
+      <h2>log in to application</h2>
+      {notificationMessage && (
+        <Notification message={notificationMessage} isError={isError} />
+      )}
+      <LoginForm handleLogin={handleLogin} />
     </>
   );
+
+  return <>{user !== null ? loggedInView() : loginForm()}</>;
 };
 
 export default App;

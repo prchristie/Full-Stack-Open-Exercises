@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export const NewNoteForm = ({ onNewBlogCreated }) => {
+export const BlogForm = ({ createBlog }) => {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [url, setUrl] = useState("");
@@ -10,7 +10,7 @@ export const NewNoteForm = ({ onNewBlogCreated }) => {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          onNewBlogCreated(title, author, url);
+          createBlog({ title, author, url });
           setTitle("");
           setAuthor("");
           setUrl("");
