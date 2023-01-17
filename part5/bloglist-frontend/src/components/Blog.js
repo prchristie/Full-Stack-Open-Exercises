@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-const Blog = ({ blog, likeBlog }) => {
+const Blog = ({ blog, likeBlog, deleteBlog, showRemove }) => {
   const [hidden, toggleHidden] = useState(true);
-
+  console.log(blog);
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -12,6 +12,8 @@ const Blog = ({ blog, likeBlog }) => {
   };
 
   const extraInfoStyle = { display: hidden ? "none" : "" };
+  const removeButtonStyle = { display: showRemove ? "" : "none" };
+
   return (
     <div style={blogStyle}>
       {blog.title}
@@ -29,6 +31,9 @@ const Blog = ({ blog, likeBlog }) => {
           <button onClick={() => likeBlog(blog)}>like</button>
         </div>
         <div>{blog.author}</div>
+        <div style={removeButtonStyle}>
+          <button onClick={() => deleteBlog(blog)}>remove</button>
+        </div>
       </div>
     </div>
   );

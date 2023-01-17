@@ -50,7 +50,7 @@ blogRouter.delete("/:id", async (request, response) => {
 
   const blog = await Blog.findById(id);
 
-  if (blog.user._id.toString() !== user.id) {
+  if (!user || blog.user._id.toString() !== user.id) {
     return response.status(401).json({
       error: "user doesn't own blog",
     });

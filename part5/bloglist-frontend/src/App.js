@@ -22,6 +22,7 @@ const App = () => {
   useEffect(() => {
     const loadBlogs = async () => {
       const blogs = await blogService.getAll();
+      blogs.sort((a, b) => b.likes - a.likes);
       setBlogs(blogs);
     };
     loadBlogs();
@@ -41,10 +42,22 @@ const App = () => {
     setBlogs(blogs.map((b) => (b.id !== newBlog.id ? b : newBlog)));
   };
 
+  const deleteBlog = async (blog) => {
+    window.confirm(`Remove blog ${blog.title} by ${blog.author}`);
+    await blogService.remove(blog);
+    setBlogs(blogs.filter((n) => n.id !== blog.id));
+  };
+
   const blogList = () => (
     <>
       {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} likeBlog={likeBlog} />
+        <Blog
+          key={blog.id}
+          blog={blog}
+          likeBlog={likeBlog}
+          deleteBlog={deleteBlog}
+          showRemove={blog.user.username === user.username}
+        />
       ))}
     </>
   );
