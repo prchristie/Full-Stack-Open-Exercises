@@ -28,6 +28,7 @@ blogRouter.put("/:id", async (request, response) => {
   const body = request.body;
 
   const blog = {
+    user: body.user,
     title: body.title,
     url: body.url,
     author: body.author,
@@ -46,7 +47,6 @@ blogRouter.put("/:id", async (request, response) => {
 blogRouter.delete("/:id", async (request, response) => {
   const id = request.params.id;
   const user = request.user;
-  console.log(user);
 
   const blog = await Blog.findById(id);
 
