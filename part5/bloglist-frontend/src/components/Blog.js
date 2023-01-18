@@ -1,28 +1,27 @@
-import { useState } from "react";
+import { useState } from 'react'
 
 const Blog = ({ blog, likeBlog, deleteBlog, showRemove }) => {
-  const [hidden, toggleHidden] = useState(true);
-  console.log(blog);
+  const [hidden, toggleHidden] = useState(true)
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
-    border: "solid",
+    border: 'solid',
     borderWidth: 1,
     marginBottom: 5,
-  };
+  }
 
-  const extraInfoStyle = { display: hidden ? "none" : "" };
-  const removeButtonStyle = { display: showRemove ? "" : "none" };
+  const extraInfoStyle = { display: hidden ? 'none' : '' }
+  const removeButtonStyle = { display: showRemove ? '' : 'none' }
 
   return (
     <div style={blogStyle}>
       {blog.title}
       <button
         onClick={() => {
-          toggleHidden(!hidden);
+          toggleHidden(!hidden)
         }}
       >
-        {hidden ? "view" : "hide"}
+        {hidden ? 'view' : 'hide'}
       </button>
       <div style={extraInfoStyle}>
         <div>{blog.url}</div>
@@ -36,7 +35,7 @@ const Blog = ({ blog, likeBlog, deleteBlog, showRemove }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Blog;
+export default Blog
