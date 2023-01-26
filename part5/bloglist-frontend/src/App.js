@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import { Notification } from './components/Notification'
 import LoginForm from './components/LoginForm'
-import { BlogForm } from './components/NewNoteForm'
+import { BlogForm } from './components/NewBlogForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Togglable from './components/Togglable'
@@ -38,8 +38,12 @@ const App = () => {
   }, [])
 
   const likeBlog = async (blog) => {
-    const newBlog = await blogService.like(blog)
-    setBlogs(blogs.map((b) => (b.id !== newBlog.id ? b : newBlog)))
+    try {
+      const newBlog = await blogService.like(blog)
+      setBlogs(blogs.map((b) => (b.id !== newBlog.id ? b : newBlog)))
+    } catch (e) {
+      displayNotification(e.response.data.error, true)
+    }
   }
 
   const deleteBlog = async (blog) => {

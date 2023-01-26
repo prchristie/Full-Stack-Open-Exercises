@@ -14,8 +14,8 @@ const Blog = ({ blog, likeBlog, deleteBlog, showRemove }) => {
   const removeButtonStyle = { display: showRemove ? '' : 'none' }
 
   return (
-    <div style={blogStyle}>
-      {blog.title}
+    <div style={blogStyle} className="blog">
+      <span>{blog.title}</span>
       <button
         onClick={() => {
           toggleHidden(!hidden)
@@ -23,7 +23,7 @@ const Blog = ({ blog, likeBlog, deleteBlog, showRemove }) => {
       >
         {hidden ? 'view' : 'hide'}
       </button>
-      <div style={extraInfoStyle}>
+      <div style={extraInfoStyle} className="blogExtraInfo">
         <div>{blog.url}</div>
         <div>
           likes {blog.likes}
