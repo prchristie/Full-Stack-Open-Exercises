@@ -16,7 +16,7 @@ const invalidIdErrorHandler = (error, request, response, next) => {
 };
 
 const getTokenFrom = (request) => {
-  const authorization = request.get("authorization");
+  const authorization = request.header("Authorization");
   if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
     return authorization.substring(7);
   }
@@ -58,6 +58,15 @@ const userExtractor = async (request, response, next) => {
   next();
 };
 
+const requireAuth = (request, response, next) => {
+  const user = request.user;
+  if (!user) {
+    return response.status(401).json({ error: "missing token" });
+  }
+
+  next();
+};
+
 const unknownEndpoint = (request, response) => {
   console.log("bye");
   response.status(404).send({ error: "unknown endpoint" });
@@ -68,4 +77,5 @@ module.exports = {
   tokenExtractor,
   userExtractor,
   unknownEndpoint,
+  requireAuth,
 };

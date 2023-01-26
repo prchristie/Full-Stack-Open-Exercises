@@ -1,4 +1,5 @@
 const Blog = require("../models/blog");
+const { requireAuth } = require("../utils/middleware");
 const blogRouter = require("express").Router();
 
 blogRouter.get("/", async (request, response) => {
@@ -7,13 +8,10 @@ blogRouter.get("/", async (request, response) => {
   response.json(blogs);
 });
 
-blogRouter.post("/", async (request, response) => {
-  const { title, author, url, likes } = request.body;
+blogRouter.post("/", requireAuth, async (request, response) => {
   const user = request.user;
 
-  if (!user) {
-    return response.status(401).json({ error: "missing token" });
-  }
+  const { title, author, url, likes } = request.body;
 
   const blog = new Blog({ title, author, url, likes, user: user._id });
 
@@ -37,20 +35,20 @@ blogRouter.put("/:id", async (request, response) => {
 
   const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, {
     new: true,
-  });
+  }).populate("user", {username: 1, name: 1});
   if (!updatedBlog) {
     response.status(404).end();
   }
   response.json(updatedBlog);
 });
 
-blogRouter.delete("/:id", async (request, response) => {
+blogRouter.delete("/:id", requireAuth, async (request, response) => {
   const id = request.params.id;
   const user = request.user;
 
   const blog = await Blog.findById(id);
 
-  if (!user || blog.user._id.toString() !== user.id) {
+  if (blog.user._id.toString() !== user.id) {
     return response.status(401).json({
       error: "user doesn't own blog",
     });
