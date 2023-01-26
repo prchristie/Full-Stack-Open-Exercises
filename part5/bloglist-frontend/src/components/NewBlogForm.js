@@ -23,6 +23,7 @@ export const BlogForm = ({ createBlog }) => {
             value={title}
             name="title"
             onChange={({ target }) => setTitle(target.value)}
+            className="titleInput"
           />
         </div>
         <div>
@@ -32,6 +33,7 @@ export const BlogForm = ({ createBlog }) => {
             value={author}
             name="author"
             onChange={({ target }) => setAuthor(target.value)}
+            className="authorInput"
           />
         </div>
         <div>
@@ -41,6 +43,7 @@ export const BlogForm = ({ createBlog }) => {
             value={url}
             name="url"
             onChange={({ target }) => setUrl(target.value)}
+            className="urlInput"
           />
         </div>
         <button type="submit">create</button>
