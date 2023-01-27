@@ -83,7 +83,7 @@ const App = () => {
     setUser(null)
   }
 
-  const newNoteRef = useRef()
+  const newBlogRef = useRef()
   const createNewBlog = async ({ title, author, url }) => {
     const newBlog = {
       title,
@@ -98,7 +98,7 @@ const App = () => {
         `a new blog ${blog.title} by ${blog.author} added`,
         false
       )
-      newNoteRef.current.toggleVisibility()
+      newBlogRef.current.toggleVisibility()
     } catch (e) {
       if (e.response.data.error === 'invalid token') {
         displayNotification('You have been logged out', true)
@@ -118,7 +118,7 @@ const App = () => {
           <button id="logout-button" onClick={() => logout()}>logout</button>
         </p>
       </div>
-      <Togglable buttonLabel="new note" ref={newNoteRef}>
+      <Togglable buttonLabel="new blog" ref={newBlogRef}>
         <h2>create new</h2>
         <BlogForm createBlog={createNewBlog} />
       </Togglable>
