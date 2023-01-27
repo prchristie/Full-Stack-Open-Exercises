@@ -11,7 +11,7 @@ export const Notification = ({ message, isError }) => {
     marginBottom: 10,
   }
 
-  return <div style={style}>{message}</div>
+  return <div className={isError ? 'error' : 'notification'} style={style}>{message}</div>
 }
 
 Notification.propTypes = {

@@ -115,7 +115,7 @@ const App = () => {
       <div>
         <p>
           {user.username} logged in
-          <button onClick={() => logout()}>logout</button>
+          <button id="logout-button" onClick={() => logout()}>logout</button>
         </p>
       </div>
       <Togglable buttonLabel="new note" ref={newNoteRef}>
