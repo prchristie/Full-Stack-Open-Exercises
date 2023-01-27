@@ -54,7 +54,7 @@ describe('Blog app', function () {
       cy.contains('test title')
     })
 
-    describe('and a blog exists', function () {
+    describe('and one blog exists', function () {
       beforeEach(() => {
         cy.createBlog({
           title: 'test title',
@@ -85,6 +85,36 @@ describe('Blog app', function () {
 
         cy.contains('view').click()
         cy.contains('remove').parent().should('have.css', 'display', 'none')
+      })
+    })
+
+    describe('and multiple blogs exist', function () {
+      beforeEach(() => {
+        [1, 2, 3].forEach((val) => cy.createBlog({
+          title: `blog${val}`,
+          author: `author${val}`,
+          url: `url${val}`,
+          likes: 0
+        }))
+      })
+
+      const likeBlog = (blogSelector, numLikes) => {
+        for(let i = 1; i < numLikes+1; i++) {
+          cy.get(blogSelector).contains('like').click()
+          cy.get(blogSelector).contains(`likes ${i}`)
+        }
+      }
+
+      it('they are in order of number of likes', () => {
+        cy.contains('blog2').parent().as('blog2').contains('view').click()
+        cy.contains('blog3').parent().as('blog3').contains('view').click()
+
+        likeBlog('@blog2', 1)
+        likeBlog('@blog3', 2)
+
+        cy.get('.blog').eq(0).contains('blog3')
+        cy.get('.blog').eq(1).contains('blog2')
+        cy.get('.blog').eq(2).contains('blog1')
       })
     })
   })

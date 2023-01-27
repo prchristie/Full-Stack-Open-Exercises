@@ -19,11 +19,15 @@ const App = () => {
     setTimeout(() => setNotificationMessage(null), 5000)
   }
 
+  const sortBlogsByLikes = (blogs) =>
+    [...blogs].sort((a, b) => b.likes - a.likes)
+
+
+
   useEffect(() => {
     const loadBlogs = async () => {
       const blogs = await blogService.getAll()
-      blogs.sort((a, b) => b.likes - a.likes)
-      setBlogs(blogs)
+      setBlogs(sortBlogsByLikes(blogs))
     }
     loadBlogs()
   }, [])
@@ -40,7 +44,8 @@ const App = () => {
   const likeBlog = async (blog) => {
     try {
       const newBlog = await blogService.like(blog)
-      setBlogs(blogs.map((b) => (b.id !== newBlog.id ? b : newBlog)))
+      const newBlogs = blogs.map((b) => (b.id !== newBlog.id ? b : newBlog))
+      setBlogs(sortBlogsByLikes(newBlogs))
     } catch (e) {
       displayNotification(e.response.data.error, true)
     }
