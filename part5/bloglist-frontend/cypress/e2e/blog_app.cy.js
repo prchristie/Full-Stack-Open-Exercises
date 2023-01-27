@@ -64,10 +64,27 @@ describe('Blog app', function () {
         })
       })
 
-      it.only('it can be liked', () => {
+      it('it can be liked', () => {
         cy.contains('view').click()
         cy.contains('like').click()
         cy.contains('likes 1')
+      })
+
+      it('it can be deleted by the owner', () => {
+        cy.contains('view').click()
+        cy.contains('remove').click()
+        cy.get('html').should('not.contain', 'test title')
+      })
+
+      it('it cant be deleted by another user', () => {
+        cy.createUser({ username: 'another user',
+          name: 'another name',
+          password: 'another password'
+        })
+        cy.login({ username: 'another user', password: 'another password' })
+
+        cy.contains('view').click()
+        cy.contains('remove').parent().should('have.css', 'display', 'none')
       })
     })
   })
