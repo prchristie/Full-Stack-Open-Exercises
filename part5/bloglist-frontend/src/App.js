@@ -112,9 +112,6 @@ const App = () => {
   const loggedInView = () => (
     <div>
       <h2>blogs</h2>
-      {notificationMessage && (
-        <Notification message={notificationMessage} isError={isError} />
-      )}
       <div>
         <p>
           {user.username} logged in
@@ -132,14 +129,13 @@ const App = () => {
   const loginForm = () => (
     <>
       <h2>log in to application</h2>
-      {notificationMessage && (
-        <Notification message={notificationMessage} isError={isError} />
-      )}
       <LoginForm handleLogin={handleLogin} />
     </>
   )
 
-  return <>{user !== null ? loggedInView() : loginForm()}</>
+  return <>{notificationMessage && (
+    <Notification message={notificationMessage} isError={isError} />
+  )}{user !== null ? loggedInView() : loginForm()}</>
 }
 
 export default App

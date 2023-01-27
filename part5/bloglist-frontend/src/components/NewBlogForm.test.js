@@ -8,9 +8,9 @@ test('NewBlogForm calls createBlog callback correctly', async () => {
 
   const container = render(<BlogForm createBlog={createBlogMock} />).container
 
-  const titleInput = container.querySelector('.titleInput')
-  const authorInput = container.querySelector('.authorInput')
-  const urlInput = container.querySelector('.urlInput')
+  const titleInput = container.querySelector('#titleInput')
+  const authorInput = container.querySelector('#authorInput')
+  const urlInput = container.querySelector('#urlInput')
   const submitButton = screen.getByText('create')
 
   const user = userEvent.setup()
