@@ -9,8 +9,8 @@ const notificationSlice = createSlice({
     },
     removeNotification() {
       return ''
-    }
-  }
+    },
+  },
 })
 
 export const { notify, removeNotification } = notificationSlice.actions
