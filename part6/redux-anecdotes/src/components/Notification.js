@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux'
 
 const Notification = () => {
   const notification = useSelector(s => s.notification)
-  if(notification === '') {
+  if(!notification) {
     return <></>
   }
 
